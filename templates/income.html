@@ -1,0 +1,295 @@
+
+{% extends "layout.html" %}
+
+{% block body %}
+
+<div class="content">
+        <div class="row">
+          <div class="col-md-12">
+              <!-- Date picker -->
+            <div class="card">
+              <div class="card-body">
+                <form action="/income" method="post">
+                  <div class="row">
+                    <div class="col-md-3">
+                      <input type="date" class="form-control" name="first_day" value="{{ first_day }}">
+                    </div>
+                    <div class="col-md-3">
+                      <input type="date" class="form-control" name="last_day" value="{{ last_day }}">
+                    </div>
+                    <div class="col-md-1 ">
+                      <button class="btn btn-primary btn-fab btn-icon btn-round" type="submit"><i class="tim-icons icon-refresh-02"></i></button>
+                    </div>
+                    <div class="text-right">
+                      <a class="btn btn-success animation-on-hover" type="button" data-toggle="modal" data-target="#exampleModal" style="position: absolute; right: 1%;" id="add">Add</a>
+                    </div>
+                   </div>
+                </form>
+              </div>
+                <!-- Date picker end -->
+
+                <!-- Alert after operation -->
+
+              <div>
+
+                {% with messages = get_flashed_messages() %}
+
+                {% if messages %}
+
+                {% for message in messages %}
+
+                <div class="alert alert-default alert-dismissable" role="alert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="close">
+                        <span aria-hidden="true">x</span>
+                    </button>
+                {{message}}
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+              </div>
+            </div>
+                <!-- Alert operation end -->
+
+                <!-- Table start -->
+              <div class="card ">
+              <div class="card-header row">
+                  <h3 class="card-title text-left"> &nbsp;&nbsp;<strong>Income Details</strong></h3>
+                  <h4 class="card-title text-right" style="position: absolute; right: 1%;"> &nbsp;&nbsp;<strong>Total : {{ "{:.2f}".format(income | sum(attribute='amount')) }}</strong></h4>
+              </div>
+              <hr>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table tablesorter " id="">
+                    <thead class=" text-primary">
+                        <tr>
+                            <th>Type</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th class="text-center">date</th>
+                            <th class="text-right">Amount</th>
+                            <th class="text-center">Period</th>
+                            <th class="text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for income in income %}
+                        <tr>
+                            <td>{{income.type}}</td>
+                            <td>{{income.name}}</td>
+                            <td>{{income.description}}</td>
+                            <td class="text-right">{{income.date}}</td>
+                            <td class="text-right">{{income.amount}}</td>
+                            <td class="text-right">From: {{income.start_date}} TO: {{income.end_date}}</td>
+                            <td class="td-actions text-right">
+                                <button type="button"  class="btn btn-success btn-sm btn-icon" data-toggle="modal" data-target="#exampleModal{{income.id}}">
+                                    <i class="tim-icons icon-pencil"></i>
+                                </button>
+                                <a href="/delete/income/{{income.id}}">
+                                    <button type="button" rel="tooltip" onclick="return confirm('Are You Sure To Delete ?')" class="btn btn-danger btn-sm btn-icon">
+                                    <i class="tim-icons icon-simple-remove"></i>
+                                </button>
+                                </a>
+                            </td>
+                        </tr>
+
+                    <!-- Table end -->
+
+
+                     <!-- Modal Edit -->
+                    <div class="modal modal-black" id="exampleModal{{income.id}}" tabindex="-1" role="dialog">
+                      <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title">Update Income </h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                              <i class="tim-icons icon-simple-remove"></i>
+                            </button>
+                          </div>
+                          <div class="modal-body" style="color:black;">
+
+                              <form action="/income/update" method="post">
+                                <input type='hidden' name='id' value='{{ income.id }}'>
+                                  <div class="row">
+                                    <div class="col-md-6 pr-md-1">
+                                      <div class="form-group">
+                                        <label style="color:gray">Date</label>
+                                        <input type="date" class="form-control" placeholder="" name="date" value="{{income.date}}">
+                                      </div>
+                                    </div>
+                                    <div class="col-md-6 pl-md-1">
+                                      <div class="form-group">
+                                        <label style="color:gray">Type</label>
+                                        <select class="form-control" id="mode_update" name="type">
+                                          <option style="background-color:#1e1e2f" {% if income.type=="Salary" %} selected="selected" {% endif %}>Salary</option>
+                                          <option style="background-color:#1e1e2f" {% if income.type=="Other" %} selected="selected" {% endif %}>Other</option>
+                                        </select>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div class="row">
+                                    <div class="col-md-6 pr-md-1">
+                                      <div class="form-group">
+                                        <label style="color:gray">Start Date</label>
+                                        <input type="date" class="form-control" placeholder="" name="start_date" value="{{income.start_date}}">
+                                      </div>
+                                    </div>
+                                    <div class="col-md-6 pl-md-1">
+                                      <div class="form-group">
+                                        <label style="color:gray">Name</label>
+                                        <input type="text" class="form-control" placeholder="Name" name="name" value="{{income.name}}">
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div class="row">
+                                    <div class="col-md-6 pr-md-1">
+                                      <div class="form-group">
+                                        <label style="color:gray">End Date</label>
+                                        <input type="date" class="form-control" placeholder="" name="end_date" value="{{income.end_date}}">
+                                      </div>
+                                    </div>
+                                    <div class="col-md-6 pl-md-1">
+                                      <div class="form-group">
+                                        <label style="color:gray">Amount</label>
+                                        <input type="text" class="form-control" placeholder="Amount" name="amount" value="{{income.amount}}">
+                                      </div>
+                                    </div>
+
+                                  </div>
+                                  <div class="row">
+                                    <div class="col-md-12">
+                                      <div class="form-group">
+                                        <label style="color:gray">Description</label>
+                                        <input type="text" class="form-control" placeholder="Description" name="description" value="{{income.description}}">
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div class="modal-footer">
+                                    <button type="submit" class="btn btn-primary">Update</button>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                  </div>
+                                </form>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td class="text-right">Total : {{ income | sum(attribute='amount') }}</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+            </div>
+                <!-- Modal Edit End -->
+
+                <!-- Modal Add Start -->
+
+              <div class="modal modal-black" id="exampleModal" data-backdrop="static" tabindex="-1" role="dialog">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title">Add Income </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                          <i class="tim-icons icon-simple-remove"></i>
+                        </button>
+                      </div>
+
+                      <div class="modal-body" style="color:black;">
+
+                          <form action="/income/add" method="post">
+
+                              <div class="row">
+                                <div class="col-md-6 pr-md-1">
+                                  <div class="form-group">
+                                    <label style="color:gray">Date</label>
+                                    <input type="date" class="form-control" placeholder="" name="date" value="">
+                                  </div>
+                                </div>
+                                <div class="col-md-6 pl-md-1">
+                                  <div class="form-group">
+                                    <label style="color:gray">Type</label>
+                                    <select class="form-control" id="mode" name="type">
+                                      <option style="background-color:#1e1e2f">Choose...</option>
+                                      <option style="background-color:#1e1e2f" value="Salary">Salary</option>
+                                      <option style="background-color:#1e1e2f" value="Other">Other</option>
+
+                                    </select>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="row">
+                                <div class="col-md-6 pr-md-1">
+                                  <div class="form-group">
+                                    <label style="color:gray">Start Date</label>
+                                    <input type="date" class="form-control" placeholder="" name="start_date" value="">
+                                  </div>
+                                </div>
+                                <div class="col-md-6 pl-md-1">
+                                  <div class="form-group">
+                                    <label style="color:gray">Name</label>
+                                    <input type="text" class="form-control" placeholder="Name" name="name" value="">
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div class="row">
+                                <div class="col-md-6 pr-md-1">
+                                  <div class="form-group">
+                                    <label style="color:gray">End Date</label>
+                                    <input type="date" class="form-control" placeholder="" name="end_date" value="">
+                                  </div>
+                                </div>
+                                <div class="col-md-6 pl-md-1">
+                                  <div class="form-group">
+                                    <label style="color:gray">Amount</label>
+                                    <input type="text" class="form-control" placeholder="Amount" name="amount" value="">
+                                  </div>
+                                </div>
+
+                              </div>
+                              <div class="row">
+                                <div class="col-md-12">
+                                  <div class="form-group">
+                                    <label style="color:gray">Description</label>
+                                    <input type="text" class="form-control" placeholder="Description" name="description" value="">
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div class="modal-footer">
+                                <button type="submit"  class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">Add</button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                              </div>
+                            </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Modal Add End -->
+          </div>
+        </div>
+</div>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+{% if submit %}
+<script type="text/javascript">
+    $(window).on('load', function() {
+        $('#exampleModal').modal('show');
+    });
+</script>
+{% endif %}
+
+{% endblock %}

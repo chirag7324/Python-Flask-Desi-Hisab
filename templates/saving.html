@@ -1,0 +1,110 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+<div class="content">
+    <div class="row">
+      <div class="col-md-12">
+            <!-- Year picker start -->
+          <div class="card">
+              <div class="card-body">
+                <form action="/saving" method="post">
+                  <div class="row">
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <select class="form-control" id="pay_mode" name="year">
+                          <option style="background-color:#1e1e2f" value="0">Choose Year...</option>
+                            {% for year in year_list %}
+                          <option style="background-color:#1e1e2f">{{year}}</option>
+                            {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="col-md-1 ">
+                      <button class="btn btn-primary btn-fab btn-icon btn-round" type="submit"><i class="tim-icons icon-refresh-02"></i></button>
+                    </div>
+
+                </form>
+              </div>
+          </div>
+      </div>
+        <!-- Year picker end -->
+
+          <!-- Table start -->
+
+          <div class="card ">
+          <div class="card-header row">
+              <h3 class="card-title text-left"> &nbsp;&nbsp;<strong>Saving Details</strong></h3>
+              <h4 class="card-title text-right" style="position: absolute; right: 1%;"> &nbsp;&nbsp;<strong>Total : {{ "{:.2f}".format((income_sav | sum(attribute='total'))-(expense_sav | sum(attribute='total'))) }}</strong></h4>
+
+          </div>
+          <hr>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table tablesorter " id="">
+                <thead class=" text-primary">
+                    <tr>
+                        <th>Year</th>
+                        <th>Month</th>
+                        <th class="text-right">Income</th>
+                        <th class="text-right">Expense</th>
+                        <th class="text-right">Saving</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for i in range(size): %}
+                    <tr>
+                        <td>{{income_sav[i].year}}</td>
+                        <td>{{month_list[i]}}</td>
+                        {% if inc_size==exp_size %}
+                            <td class="text-right">{{income_sav[i].total}}</td>
+                            <td class="text-right">{{expense_sav[i].total}}</td>
+                            <td class="text-right">{{"{:.2f}".format(income_sav[i].total-expense_sav[i].total)}}</td>
+                            {% elif inc_size > exp_size %}
+                                {% if i==0 %}
+                                <td class="text-right">{{income_sav[i].total}}</td>
+                                <td class="text-right">0</td>
+                                <td class="text-right">{{"{:.2f}".format(income_sav[i].total-0)}}</td>
+                                {% else %}
+                                <td class="text-right">{{income_sav[i].total}}</td>
+                                <td class="text-right">{{expense_sav[i-1].total}}</td>
+                                <td class="text-right">{{"{:.2f}".format(income_sav[i].total-expense_sav[i-1].total)}}</td>
+                                {% endif %}
+                            {% elif inc_size < exp_size %}
+                                {% if i==0 %}
+                                <td class="text-right">0</td>
+                                <td class="text-right">{{expense_sav[i].total}}</td>
+                                <td class="text-right">{{"{:.2f}".format(0-expense_sav[i].total)}}</td>
+                                {% else %}
+                                <td class="text-right">{{income_sav[i-1].total}}</td>
+                                <td class="text-right">{{expense_sav[i].total}}</td>
+                                <td class="text-right">{{"{:.2f}".format(income_sav[i-1].total-expense_sav[i].total)}}</td>
+                                {% endif %}
+
+                        {%endif%}
+
+                    </tr>
+                {%endfor%}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td><strong>Total : </strong>></td>
+                        <td></td>
+                        <td class="text-right"><strong>{{ "{:.2f}".format(income_sav | sum(attribute='total')) }}</strong></td>
+                        <td class="text-right"><strong>{{ "{:.2f}".format(expense_sav | sum(attribute='total')) }}</strong></td>
+                        <td class="text-right"><strong>{{ "{:.2f}".format((income_sav | sum(attribute='total'))-(expense_sav | sum(attribute='total'))) }}</strong></td>
+
+                    </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+          </div>
+
+         <!-- Table end -->
+      </div>
+    </div>
+</div>
+
+{% endblock %}

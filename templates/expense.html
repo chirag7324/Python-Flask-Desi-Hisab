@@ -1,0 +1,477 @@
+
+{% extends "layout.html" %}
+
+{% block body %}
+
+
+
+<div class="content">
+        <div class="row">
+          <div class="col-md-12">
+              <!-- Date picker -->
+            <div class="card">
+              <div class="card-body">
+                <form action="/expense" method="post">
+                  <div class="row">
+                    <div class="col-md-3">
+                      <input type="date" class="form-control" name="first_day" value="{{ first_day }}">
+                    </div>
+                    <div class="col-md-3">
+                      <input type="date" class="form-control" name="last_day" value="{{ last_day }}">
+                    </div>
+                    <div class="col-md-1 ">
+                      <button class="btn btn-primary btn-fab btn-icon btn-round" type="submit"><i class="tim-icons icon-refresh-02"></i></button>
+                    </div>
+                    <div class="text-right">
+                      <a class="btn btn-success animation-on-hover" href="/income/add" data-toggle="modal" data-target="#exampleModal" style="position: absolute; right: 1%;">Add</a>                    </div>
+                    </div>
+                </form>
+              </div>
+                <!-- Date picker end -->
+
+                <!-- Alert after operation -->
+
+              <div>
+
+                {% with messages = get_flashed_messages() %}
+
+                {% if messages %}
+
+                {% for message in messages %}
+
+                <div class="alert alert-default alert-dismissable" role="alert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="close">
+                        <span aria-hidden="true">x</span>
+                    </button>
+                {{message}}
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+              </div>
+            </div>
+                <!-- Alert operation end -->
+
+                <!-- Table start -->
+              <div class="card ">
+              <div class="card-header row">
+                  <h3 class="card-title text-left"> &nbsp;&nbsp;<strong>Expense Details</strong></h3>
+                  <h4 class="card-title text-right" style="position: absolute; right: 1%;"> &nbsp;&nbsp;<strong>Total : {{ "{:.2f}".format( expense | sum(attribute='amount')) }}</strong></h4>
+
+              </div>
+              <hr>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table tablesorter " id="">
+                    <thead class=" text-primary">
+                        <tr>
+                            <th>Date</th>
+                            <th>Name</th>
+                            <th>Category</th>
+<!--                            <th>Mode</th>-->
+                            <th>Bank</th>
+                            <th>Credit Card</th>
+                            <th class="text-right">Amount</th>
+                            <th class="text-center">Description</th>
+                            <th class="text-right" style="width:12%">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for expense in expense %}
+                        <tr>
+                            <td style="width:10%">{{expense.date}}</td>
+                            <td>{{expense.name}}</td>
+
+                            <td>{{expense.tblcategory.category}}</td>
+<!--                            <td>{{expense.mode}}</td>-->
+
+                            <td>{{expense.tblbanks.bank}}</td>
+                            <td>{{expense.tblcreditcard.credit_card}}</td>
+
+                            <td class="text-right">{{expense.amount}}</td>
+                            <td class="text-center">{{expense.description}}</td>
+                            <td class="td-actions text-right" style="width:5%">
+                                <button type="button"  class="btn btn-success btn-sm btn-icon" data-toggle="modal" data-target="#exampleModal{{expense.id}}" onclick="editfunction({{expense.id}})">
+                                    <i class="tim-icons icon-pencil"></i>
+                                </button>
+                                <a href="/delete/expense/{{expense.id}}">
+                                    <button type="button" onclick="return confirm('Are You Sure To Delete ?')" rel="tooltip" class="btn btn-danger btn-sm btn-icon">
+                                    <i class="tim-icons icon-simple-remove"></i>
+                                </button>
+                                </a>
+                            </td>
+                        </tr>
+
+                    <!-- Table end -->
+
+
+                     <!-- Modal Edit -->
+                    <div class="modal modal-black" id="exampleModal{{expense.id}}" tabindex="-1" role="dialog">
+                      <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title">Update Expense </h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                              <i class="tim-icons icon-simple-remove"></i>
+                            </button>
+                          </div>
+                          <div class="modal-body" style="color:black;">
+                              <form action="/expense/update" method="post">
+                                <input type='hidden' name='id' value='{{ expense.id }}'>
+                                  <div class="row">
+                                <div class="col-md-6 pr-md-1">
+                                  <div class="form-group">
+                                    <label style="color:gray">Date</label>
+                                    <input type="date" class="form-control" placeholder="" name="date" value="{{expense.date}}">
+                                  </div>
+                                </div>
+                                <div class="col-md-6 pl-md-1">
+                                  <div class="form-group">
+                                    <label style="color:gray">Mode</label>
+                                    <select class="form-control" id="pay_mode_update{{expense.id}}" name="mode" onchange="editfunction({{expense.id}})">
+                                      <option style="background-color:#1e1e2f">Choose...</option>
+                                      <option style="background-color:#1e1e2f" {% if expense.mode=="Cash" %} selected="selected" {% endif %} value="Cash">Cash</option>
+                                      <option style="background-color:#1e1e2f" {% if expense.mode=="Bank" %} selected="selected" {% endif %} value="Bank">Bank</option>
+                                      <option style="background-color:#1e1e2f" {% if expense.mode=="Credit card" %} selected="selected" {% endif %} value="Credit card">Credit card</option>
+
+                                    </select>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="row">
+                                <div class="col-md-6 pr-md-1">
+                                  <div class="form-group">
+                                    <label style="color:gray">Name</label>
+                                    <input type="text" class="form-control" placeholder="Name" name="name" value="{{expense.name}}">
+                                  </div>
+                                </div>
+                                <div class="col-md-6 pl-md-1">
+
+                                  <div class="form-group" style="display:none;" id='bank_dropdown_update{{expense.id}}'>
+                                    <label style="color:gray">Bank</label>
+                                    <select class="form-control" id="exampleFormControlSelect1" id="bid{{expense.id}}" name="bid">
+                                      <option style="background-color:#1e1e2f" id="default1{{expense.id}}">Choose...</option>
+                                      {% for bank in bank %}
+                                        {% set bank_id = bank.id %}
+                                      <option style="background-color:#1e1e2f" {% if expense.bid==bank_id %} selected="selected" {% endif %} value="{{bank.id}}">{{bank.bank}}</option>
+                                      {% endfor %}
+                                    </select>
+                                  </div>
+
+                                </div>
+                              </div>
+
+                              <div class="row">
+                                <div class="col-md-6 pr-md-1">
+                                  <div class="form-group">
+                                   <label style="color:gray">Category</label>
+                                    <select class="form-control" id="exampleFormControlSelect1" name="cid">
+                                      <option style="background-color:#1e1e2f">Choose...</option>
+                                      {% for category in category %}
+                                        {% set cat_id = category.id %}
+                                      <option style="background-color:#1e1e2f" {% if expense.cid==cat_id %} selected="selected" {% endif %} value="{{category.id}}">{{category.category}}</option>
+                                      {% endfor %}
+                                    </select>
+                                  </div>
+                                </div>
+                                <div class="col-md-6 pl-md-1">
+
+                                  <div class="form-group" style="display:none;" id='cc_dropdown_update{{expense.id}}'>
+                                    <label style="color:gray">Credit Card</label>
+                                    <select class="form-control" id="exampleFormControlSelect1" id="ccid{{expense.id}}"  name="ccid">
+                                      <option style="background-color:#1e1e2f" id="default{{expense.id}}">Choose...</option>
+                                      {% for credit in credit %}
+                                        {% set credit_id = credit.id %}
+                                      <option style="background-color:#1e1e2f" {% if expense.ccid==credit_id %} selected="selected" {% endif %} value="{{credit.id}}">{{credit.credit_card}}</option>
+                                      {% endfor %}
+                                    </select>
+                                  </div>
+
+                                </div>
+
+                              </div>
+                              <div class="row">
+                                <div class="col-md-3 pr-md-1">
+                                  <div class="form-group">
+                                    <label style="color:gray">Amount</label>
+                                    <input type="text" class="form-control" placeholder="Amount" name="amount" value="{{expense.amount}}">
+                                  </div>
+                                </div>
+                                <div class="col-md-9 pl-md-1">
+                                  <div class="form-group">
+                                    <label style="color:gray">Description</label>
+                                    <input type="text" class="form-control" placeholder="Description" name="description" value="{{expense.description}}">
+                                  </div>
+                                </div>
+                              </div>
+
+                                  <div class="modal-footer">
+                                    <button type="submit" class="btn btn-primary">Update</button>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                  </div>
+                                </form>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td class="text-right">Total : {{ "{:.2f}".format( expense | sum(attribute='amount')) }}</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+            </div>
+                <!-- Modal Edit End -->
+
+                <!-- Modal Add Start -->
+              <div class="modal modal-black" id="exampleModal" tabindex="-1" role="dialog">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title">Add Expesne </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                          <i class="tim-icons icon-simple-remove"></i>
+                        </button>
+                      </div>
+                      <div class="modal-body" style="color:black;">
+                          <form action="/expense/add" method="post">
+
+                              <div class="row">
+                                <div class="col-md-6 pr-md-1">
+                                  <div class="form-group">
+                                    <label style="color:gray">Date</label>
+                                    <input type="date" class="form-control" placeholder="" name="date" value="">
+                                  </div>
+                                </div>
+                                <div class="col-md-6 pl-md-1">
+                                  <div class="form-group">
+                                    <label style="color:gray">Mode</label>
+                                    <select class="form-control" id="pay_mode" name="mode">
+                                      <option style="background-color:#1e1e2f">Choose...</option>
+                                      <option style="background-color:#1e1e2f" value="Cash">Cash</option>
+                                      <option style="background-color:#1e1e2f" value="Bank">Bank</option>
+                                      <option style="background-color:#1e1e2f" value="Credit card">Credit card</option>
+
+                                    </select>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="row">
+                                <div class="col-md-6 pr-md-1">
+                                  <div class="form-group">
+                                    <label style="color:gray">Name</label>
+                                    <input type="text" class="form-control" placeholder="Name" name="name" value="">
+                                  </div>
+                                </div>
+                                <div class="col-md-6 pl-md-1">
+                                  <div class="form-group" style='display:none;' id='bank_dropdown'>
+                                    <label style="color:gray">Bank</label>
+                                    <select class="form-control" id="exampleFormControlSelect1" name="bid">
+                                      <option style="background-color:#1e1e2f">Choose...</option>
+                                      {% for bank in bank %}
+                                      <option style="background-color:#1e1e2f" value="{{bank.id}}">{{bank.bank}}</option>
+                                      {% endfor %}
+                                    </select>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div class="row">
+                                <div class="col-md-6 pr-md-1">
+                                  <div class="form-group">
+                                   <label style="color:gray">Category
+                                       <a href="#category_modal" data-toggle="modal" data-target="#category_modal">  (Add new)</a></label>
+                                    <select class="form-control" id="exampleFormControlSelect1" name="cid">
+                                      <option style="background-color:#1e1e2f">Choose...</option>
+                                      {% for category in category %}
+                                      <option style="background-color:#1e1e2f" value="{{category.id}}">{{category.category}}</option>
+                                      {% endfor %}
+
+                                    </select>
+                                  </div>
+                                </div>
+                                <div class="col-md-6 pl-md-1">
+                                  <div class="form-group" style='display:none;' id='cc_dropdown'>
+                                    <label style="color:gray">Credit Card</label>
+                                    <select class="form-control" id="exampleFormControlSelect1" name="ccid">
+                                      <option style="background-color:#1e1e2f">Choose...</option>
+                                      {% for credit in credit %}
+                                      <option style="background-color:#1e1e2f" value="{{credit.id}}">{{credit.credit_card}}</option>
+                                      {% endfor %}
+                                    </select>
+                                  </div>
+                                </div>
+
+                              </div>
+                              <div class="row">
+                                <div class="col-md-3 pr-md-1">
+                                  <div class="form-group">
+                                    <label style="color:gray">Amount</label>
+                                    <input type="text" class="form-control" placeholder="Amount" name="amount" value="">
+                                  </div>
+                                </div>
+                                <div class="col-md-9 pl-md-1">
+                                  <div class="form-group">
+                                    <label style="color:gray">Description</label>
+                                    <input type="text" class="form-control" placeholder="Description" name="description" value="">
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary">Add</button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                              </div>
+                            </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Modal Add End -->
+
+                 <!-- Modal Category Start -->
+
+              <div class="modal modal-black" id="category_modal" tabindex="-1" role="dialog">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title">Add Category</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body">
+                        <form action="/category" method="post">
+                          <div class="row">
+                            <div class="col-md-12 pr-md-1">
+                              <div class="form-group">
+                                <label style="color:gray">Category</label>
+                                <input type="text" class="form-control" placeholder="Category Name" name="category" value="{{category.category}}">
+                              </div>
+                            </div>
+                          </div>
+
+                          <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Add</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                          </div>
+                            <hr>
+                          <div class="table-responsive">
+                              <table class="table tablesorter " id="">
+                                <thead class=" text-primary">
+                                    <tr>
+                                        <th>Category</th>
+                                        <th class="text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% for category in category %}
+                                    <tr>
+                                        <td>{{category.category}}</td>
+                                        <td class="td-actions text-right">
+                                            <a href="/delete/category/{{category.id}}">
+                                                <button type="button" onclick="return confirm('Are You Sure To Delete ?')" rel="tooltip" class="btn btn-danger btn-sm btn-icon">
+                                                <i class="tim-icons icon-simple-remove"></i>
+                                            </button>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                              </table>
+                            </div>
+                      </div>
+                    </form>
+                    </div>
+                  </div>
+                </div>
+
+
+              <!-- Modal Category end -->
+          </div>
+        </div>
+</div>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+{% if submit %}
+<script type="text/javascript">
+    $(window).on('load', function() {
+        $('#exampleModal').modal('show');
+    });
+</script>
+{% endif %}
+
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    $('#pay_mode').on('change', function() {
+      if ( this.value == 'Bank')
+      {
+        $("#bank_dropdown").show();
+      }
+      else
+      {
+        $("#bank_dropdown").hide();
+      }
+      if ( this.value == 'Credit card')
+      {
+        $("#cc_dropdown").show();
+      }
+      else
+      {
+        $("#cc_dropdown").hide();
+      }
+    });
+
+   });
+
+</script>
+
+<script>
+    function editfunction(id){
+    var mode = document.getElementById("pay_mode_update"+id).value;
+
+    if (mode == "Bank"){
+    var bank =(document.getElementById("bank_dropdown_update"+id));
+    bank.style.display="block";
+    var card =(document.getElementById("cc_dropdown_update"+id));
+    card.style.display="none";
+    document.getElementById("default"+id).selected = "true";
+    }
+    if (mode == "Credit card"){
+    var card =(document.getElementById("cc_dropdown_update"+id));
+    card.style.display="block";
+    card.required = "true";
+    var bank =(document.getElementById("bank_dropdown_update"+id));
+    bank.style.display="none";
+    document.getElementById("default1"+id).selected = "true";
+    }
+    if (mode == "Cash"){
+    var card =(document.getElementById("cc_dropdown_update"+id));
+    card.style.display="none";
+    var bank =(document.getElementById("bank_dropdown_update"+id));
+    bank.style.display="none";
+    document.getElementById("default1"+id).selected = "true";
+    document.getElementById("default"+id).selected = "true";
+
+    }
+
+
+    }
+</script>
+
+{% endblock %}
+
+

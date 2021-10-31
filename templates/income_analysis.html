@@ -1,0 +1,87 @@
+
+{% extends "layout.html" %}
+
+{% block body %}
+
+<div class="content">
+    <div class="row">
+      <div class="col-md-12">
+          <!-- Date picker -->
+        <div class="card">
+          <div class="card-body">
+            <form action="#" method="post">
+              <div class="row">
+                <div class="col-md-3">
+                  <input type="date" class="form-control" name="first_day" value="{{ first_day }}">
+                </div>
+                <div class="col-md-3">
+                  <input type="date" class="form-control" name="last_day" value="{{ last_day }}">
+                </div>
+                  <div class="col-md-3">
+                  <select class="form-control" id="#" name="name">
+                      <option style="background-color:#1e1e2f" value="0">Choose Name...</option>
+                        {% for name in name_list %}
+                      <option style="background-color:#1e1e2f">{{name}}</option>
+                        {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-1 ">
+                  <button class="btn btn-primary btn-fab btn-icon btn-round" type="submit"><i class="tim-icons icon-refresh-02"></i></button>
+                </div>
+               </div>
+            </form>
+          </div>
+            <!-- Date picker end -->
+
+            <!-- Alert after operation -->
+
+          <div>
+
+
+          </div>
+        </div>
+            <!-- Alert operation end -->
+
+            <!-- Table start -->
+          <div class="card ">
+          <div class="card-header row">
+              <h3 class="card-title text-left"> &nbsp;&nbsp;<strong>Income Details</strong></h3>
+              <h4 class="card-title text-right" style="position: absolute; right: 1%;"> &nbsp;&nbsp;<strong>Total : {{ income | sum(attribute='amount') }}</strong></h4>
+          </div>
+          <hr>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table tablesorter " id="">
+                <thead class=" text-primary">
+                    <tr>
+                        <th>Type</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th class="text-center">date</th>
+                        <th class="text-right">Amount</th>
+                        <th class="text-center">Period</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for income in income %}
+                    <tr>
+                        <td>{{income.type}}</td>
+                        <td>{{income.name}}</td>
+                        <td>{{income.description}}</td>
+                        <td class="text-right">{{income.date}}</td>
+                        <td class="text-right">{{income.amount}}</td>
+                        <td class="text-right">From: {{income.start_date}} TO: {{income.end_date}}</td>
+
+                    </tr>
+                {% endfor %}
+                </tbody>
+              </table>
+            </div>
+                <!-- Table end -->
+          </div>
+      </div>
+      </div>
+    </div>
+</div>
+
+{% endblock %}

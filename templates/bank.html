@@ -1,0 +1,375 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+<div class="content">
+    <div class="row">
+      <div class="col-md-12">
+            <!-- Year picker start -->
+          <div class="card">
+              <div class="card-body">
+                <form action="" method="post">
+                  <div class="row">
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <select class="form-control" id="pay_mode" name="year">
+                          <option style="background-color:#1e1e2f" value="0">Choose Year...</option>
+                            {% for year in year_list %}
+                          <option style="background-color:#1e1e2f">{{year}}</option>
+                            {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <select class="form-control" id="pay_mode" name="bank_list">
+                          <option style="background-color:#1e1e2f" value="0">Choose Bank...</option>
+                            {% for bank in bank %}
+                          <option style="background-color:#1e1e2f" value="{{bank.id}}">{{bank.bank}}</option>
+                            {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="col-md-1 ">
+                      <button class="btn btn-primary btn-fab btn-icon btn-round" type="submit"><i class="tim-icons icon-refresh-02"></i></button>
+                    </div>
+                    <div class="text-right">
+                      <a class="btn btn-success animation-on-hover" type="button" data-toggle="modal" data-target="#bank_modal" style="position: absolute; right: 20%;" id="add">Bank</a>
+
+                    </div>
+                    <div class="text-right">
+                        <a class="btn btn-success animation-on-hover" type="button" data-toggle="modal" data-target="#deposit_modal" style="position: absolute; right: 1%;" id="add">Make Deposit</a>
+                    </div>
+                  </div>
+                </form>
+              </div>
+              <div class="card-footer">
+
+                {% with messages = get_flashed_messages() %}
+
+                {% if messages %}
+
+                {% for message in messages %}
+
+                <div class="alert alert-default alert-dismissable" role="alert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="close">
+                        <span aria-hidden="true">x</span>
+                    </button>
+                {{message}}
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+              </div>
+          </div>
+        <!-- Year picker end -->
+
+         <!-- Modal Bank Start -->
+
+          <div class="modal modal-black" id="bank_modal" tabindex="-1" role="dialog">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title">Add Bank</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <form action="/bank/add" method="post">
+                      <div class="row">
+                        <div class="col-md-12 pr-md-1">
+                          <div class="form-group">
+                            <label style="color:gray">Bank</label>
+                            <input type="text" class="form-control" placeholder="Bank Name" name="bank" value="">
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Add</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                      </div>
+                        <hr>
+                      <div class="table-responsive">
+                          <table class="table tablesorter " id="">
+                            <thead class=" text-primary">
+                                <tr>
+                                    <th>Bank</th>
+                                    <th class="text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for bank in bank %}
+                                <tr>
+                                    <td>{{bank.bank}}</td>
+                                    <td class="td-actions text-right">
+                                        <a href="/delete/bank/{{bank.id}}">
+                                            <button type="button" onclick="return confirm('Are You Sure To Delete ?')" rel="tooltip" class="btn btn-danger btn-sm btn-icon">
+                                            <i class="tim-icons icon-simple-remove"></i>
+                                        </button>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                          </table>
+                        </div>
+                    </form>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+         <!-- Modal Bank End -->
+
+          <!-- Modal deposit add Start -->
+
+          <div class="modal modal-black" id="deposit_modal" tabindex="-1" role="dialog">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title">Add Bank Deposit</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body">
+                        <form action="/deposit/add" method="post">
+                          <div class="row">
+                            <div class="col-md-6 pr-md-1">
+                              <div class="form-group">
+                                <label style="color:gray">Bank</label>
+                                <select class="form-control" id="" name="bid">
+                                  <option style="background-color:#1e1e2f" value="0">Choose Bank...</option>
+                                    {% for bank in bank %}
+                                  <option style="background-color:#1e1e2f" value="{{bank.id}}">{{bank.bank}}</option>
+                                    {% endfor %}
+                                </select>
+                              </div>
+                            </div>
+                            <div class="col-md-6 pl-md-1">
+                              <div class="form-group">
+                                <label style="color:gray">Date</label>
+                                <input type="date" class="form-control" placeholder="" name="date" value="">
+                              </div>
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-md-6 pr-md-1">
+                              <div class="form-group">
+                                <label style="color:gray">Amount</label>
+                                <input type="text" class="form-control" placeholder="Amount" name="amount" value="">
+                              </div>
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-md-12 pr-md-1">
+                              <div class="form-group">
+                                <label style="color:gray">Description</label>
+                                <input type="text" class="form-control" placeholder="Description" name="description" value="">
+                              </div>
+                            </div>
+                          </div>
+
+                          <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Add</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                          </div>
+                        </form>
+                        </div>
+
+
+                      </div>
+                    </div>
+                  </div>
+
+
+         <!-- Modal deposit add End -->
+
+          <!-- Table Bankdeposit start -->
+
+            <div class="card ">
+              <div class="card-header row">
+                  <h3 class="card-title text-left"> &nbsp;&nbsp;<strong>Bank Deposit Details</strong></h3>
+              </div>
+              <hr>
+              <div class="card-body">
+                  <div class="table-responsive">
+                      <table class="table tablesorter " id="">
+                        <thead class=" text-primary">
+                            <tr>
+                                <th>Date</th>
+                                <th>Bank</th>
+                                <th class="text-right">Amount</th>
+                                <th class="text-center">Description</th>
+                                <th class="text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for bank_deposit in bank_deposit %}
+                            <tr>
+                                <td>{{bank_deposit.date}}</td>
+                                <td>{{bank_deposit.tblbanks.bank}}</td>
+                                <td class="text-right">{{bank_deposit.amount}}</td>
+                                <td class="text-center">{{bank_deposit.description}}</td>
+                                <td class="td-actions text-right">
+                                    <button type="button"  class="btn btn-success btn-sm btn-icon" data-toggle="modal" data-target="#deposit_modal{{bank_deposit.id}}">
+                                    <i class="tim-icons icon-pencil"></i>
+                                    </button>
+                                    <a href="/delete/deposit/{{bank_deposit.id}}">
+                                        <button type="button" onclick="return confirm('Are You Sure To Delete ?')" rel="tooltip" class="btn btn-danger btn-sm btn-icon">
+                                        <i class="tim-icons icon-simple-remove"></i>
+                                    </button>
+                                    </a>
+                                </td>
+                            </tr>
+                         <!-- Modal deposit update Start -->
+
+          <div class="modal modal-black" id="deposit_modal{{bank_deposit.id}}" tabindex="-1" role="dialog">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title">Update Bank Deposit</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body">
+                        <form action="/deposit/update" method="post">
+                          <input type='hidden' name='id' value='{{ bank_deposit.id }}'>
+                          <div class="row">
+                            <div class="col-md-6 pr-md-1">
+                              <div class="form-group">
+                                <label style="color:gray">Bank</label>
+                                <select class="form-control" id="" name="bid">
+                                  <option style="background-color:#1e1e2f" value="0">Choose Bank...</option>
+                                    {% for bank in bank %}
+                                    {% set bank_id = bank.id %}
+                                    <option style="background-color:#1e1e2f" {% if bank_deposit.bid==bank_id %} selected="selected" {% endif %} value="{{bank.id}}">{{bank.bank}}</option>
+                                    {% endfor %}
+                                </select>
+                              </div>
+                            </div>
+                            <div class="col-md-6 pl-md-1">
+                              <div class="form-group">
+                                <label style="color:gray">Date</label>
+                                <input type="date" class="form-control" placeholder="" name="date" value="{{bank_deposit.date}}">
+                              </div>
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-md-6 pr-md-1">
+                              <div class="form-group">
+                                <label style="color:gray">Amount</label>
+                                <input type="text" class="form-control" placeholder="Amount" name="amount" value="{{bank_deposit.amount}}">
+                              </div>
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-md-12 pr-md-1">
+                              <div class="form-group">
+                                <label style="color:gray">Description</label>
+                                <input type="text" class="form-control" placeholder="Description" name="description" value="{{bank_deposit.description}}">
+                              </div>
+                            </div>
+                          </div>
+
+                          <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Update</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                          </div>
+                        </form>
+                        </div>
+
+
+                      </div>
+                    </div>
+                  </div>
+
+
+         <!-- Modal deposit update End -->
+
+                        {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+              </div>
+            </div>
+
+           <!-- Table Bankdeposit end -->
+
+          <!-- Modal deposit update Start -->
+
+          <div class="modal modal-black" id="deposit_modal{{bank_deposit.id}}" tabindex="-1" role="dialog">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title">Add Bank Deposit</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body">
+                        <form action="/deposit/update" method="post">
+                          <input type='hidden' name='id' value='{{ bank_deposit.id }}'>
+                          <div class="row">
+                            <div class="col-md-6 pr-md-1">
+                              <div class="form-group">
+                                <label style="color:gray">Bank</label>
+                                <select class="form-control" id="" name="bid">
+                                  <option style="background-color:#1e1e2f" value="0">Choose Bank...</option>
+                                    {% for bank in bank %}
+                                    {% set bank_id = bank.id %}
+                                    <option style="background-color:#1e1e2f" {% if bank_deposit.bid==bank_id %} selected="selected" {% endif %} value="{{bank.id}}">{{bank.bank}}</option>
+                                    {% endfor %}
+                                </select>
+                              </div>
+                            </div>
+                            <div class="col-md-6 pl-md-1">
+                              <div class="form-group">
+                                <label style="color:gray">Date</label>
+                                <input type="date" class="form-control" placeholder="" name="date" value="{{bank_deposit.date}}">
+                              </div>
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-md-6 pr-md-1">
+                              <div class="form-group">
+                                <label style="color:gray">Amount</label>
+                                <input type="text" class="form-control" placeholder="Amount" name="amount" value="{{bank_deposit.amount}}">
+                              </div>
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-md-12 pr-md-1">
+                              <div class="form-group">
+                                <label style="color:gray">Description</label>
+                                <input type="text" class="form-control" placeholder="Description" name="description" value="{{bank_deposit.description}}">
+                              </div>
+                            </div>
+                          </div>
+
+                          <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Add</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                          </div>
+                        </form>
+                        </div>
+
+
+                      </div>
+                    </div>
+                  </div>
+
+
+         <!-- Modal deposit update End -->
+
+
+      </div>
+    </div>
+</div>
+
+{% endblock %}

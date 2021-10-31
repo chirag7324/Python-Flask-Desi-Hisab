@@ -1,0 +1,481 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+<div class="content">
+    <div class="row">
+      <div class="col-md-12">
+            <!-- Year picker start -->
+          <div class="card">
+              <div class="card-body">
+                <form action="/borrow_lending" method="post">
+                  <div class="row">
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <select class="form-control" id="" name="year">
+                          <option style="background-color:#1e1e2f" value="0">Choose Year...</option>
+                            {% for year in year_list %}
+                            <option style="background-color:#1e1e2f">{{year}}</option>
+                            {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <select class="form-control" id="" name="filter_type">
+                          <option style="background-color:#1e1e2f" value="0">Choose type...</option>
+                          <option style="background-color:#1e1e2f" value="LENDING">LENDING</option>
+                          <option style="background-color:#1e1e2f" value="BORROW">BORROW</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="col-md-1 ">
+                      <button class="btn btn-primary btn-fab btn-icon btn-round" type="submit"><i class="tim-icons icon-refresh-02"></i></button>
+                    </div>
+                    <div class="text-right">
+                      <a class="btn btn-success animation-on-hover" type="button" href="/repay" style="position: absolute; right: 20%;" id="add">Repay</a>
+                    </div>
+                    <div class="text-right">
+                        <a class="btn btn-success animation-on-hover" type="button" data-toggle="modal" data-target="#borrow_modal" style="position: absolute; right: 1%;" id="add">Borrow/Lending</a>
+                    </div>
+                  </div>
+                </form>
+              </div>
+              <div>
+
+                {% with messages = get_flashed_messages() %}
+
+                {% if messages %}
+
+                {% for message in messages %}
+
+                <div class="alert alert-default alert-dismissable" role="alert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="close">
+                        <span aria-hidden="true">x</span>
+                    </button>
+                {{message}}
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+              </div>
+          </div>
+        <!-- Year picker end -->
+
+          <!-- Table borrow start -->
+
+            <div class="card ">
+              <div class="card-header">
+                  <div class="row">
+                      <h3 class="card-title text-left"> &nbsp;&nbsp<strong>Borrow/Lending Details</strong></h3>
+                  </div>
+              </div>
+              <hr>
+              <div class="card-body">
+                  <div class="table-responsive">
+                      <table class="table tablesorter " id="">
+                        <thead class=" text-primary">
+                            <tr>
+                                <th>Date</th>
+                                <th>Trans No</th>
+                                <th>Type</th>
+                                <th>Mode</th>
+                                <th>Borrower</th>
+                                <th>Lender</th>
+                                <th class="text-center">Description</th>
+                                <th class="text-right">Amount</th>
+                                <th class="text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for borrow in borr.items %}
+                            <tr>
+                                <td style="width:10%">{{borrow.date}}</td>
+                                <td>{{borrow.trans_no | int}}</td>
+                                <td>{{borrow.type}}</td>
+                                <td>{{borrow.mode}}</td>
+                                <td>{{borrow.borrower}}</td>
+                                <td>{{borrow.lender}}</td>
+                                <td class="text-center" style="width:20%">{{borrow.description}}</td>
+                                <td class="text-right">{{borrow.borrow_amount}}</td>
+                                <td class="td-actions text-right" style="width:15%">
+                                    <button type="button"  class="btn btn-success btn-sm btn-icon" data-toggle="modal" data-target="#borrower_update_modal{{borrow.id}}" onclick="editfunction({{borrow.id}})">
+                                    <i class="tim-icons icon-pencil"></i>
+                                    </button>
+                                    <a href="/delete/borrower/{{borrow.id}}">
+                                        <button type="button" onclick="return confirm('Are You Sure To Delete ?')" rel="tooltip" class="btn btn-danger btn-sm btn-icon">
+                                        <i class="tim-icons icon-simple-remove"></i>
+                                    </button>
+                                    </a>
+                                    <a href="/borrow/addtocash/{{borrow.id}}">
+                                    <button type="button" rel="tooltip" class="btn btn-info btn-sm btn-icon">
+                                        <i class="tim-icons icon-simple-add"></i>
+                                    </button>
+                                    </a>
+                                    <a href="/borrow/subtracttocash/{{borrow.id}}">
+                                    <button type="button" rel="tooltip" class="btn btn-info btn-sm btn-icon">
+                                        <i class="tim-icons icon-simple-delete"></i>
+                                    </button>
+                                    </a>
+                                </td>
+                            </tr>
+                         <!-- Modal deposit update Start -->
+
+          <div class="modal modal-black" id="borrower_update_modal{{borrow.id}}" tabindex="-1" role="dialog">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title">Update Borrow/Lending</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body">
+                        <form action="/borrower/update" method="post">
+                          <input type='hidden' name='id' value='{{borrow.id}}'>
+                            <div class="row">
+                                <div class="col-md-6 pr-md-1">
+                                  <div class="form-group">
+                                    <label style="color:gray">Date</label>
+                                    <input type="date" class="form-control" placeholder="" name="date" value="{{borrow.date}}">
+                                  </div>
+                                </div>
+                                <div class="col-md-6 pl-md-1">
+                                  <div class="form-group">
+                                    <label style="color:gray">Trans No.</label>
+                                    <input type="text" class="form-control" placeholder="" id="trans_no" name="trans_no" style="color:pink" value="{{borrow.trans_no}}" readonly>
+                                  </div>
+                                </div>
+
+                              </div>
+                              <div class="row">
+                                <div class="col-md-6 pr-md-1">
+                                  <div class="form-group">
+                                    <label style="color:gray">Type</label>
+                                    <select class="form-control" name="type" >
+                                      <option style="background-color:#1e1e2f">Choose...</option>
+                                      <option style="background-color:#1e1e2f" {% if borrow.type=="BORROW" %} selected="selected" {% endif %} value="BORROW">BORROW</option>
+                                      <option style="background-color:#1e1e2f" {% if borrow.type=="LENDING" %} selected="selected" {% endif %} value="LENDING">LENDING</option>
+                                    </select>
+                                  </div>
+                                </div>
+                                <div class="col-md-6 pl-md-1">
+                                  <div class="form-group">
+                                    <label style="color:gray">Mode</label>
+                                    <select class="form-control"id="pay_mode_update{{borrow.id}}" name="mode" onchange="editfunction({{borrow.id}})">
+                                      <option style="background-color:#1e1e2f">Choose...</option>
+                                      <option style="background-color:#1e1e2f" {% if borrow.mode=="Cash" %} selected="selected" {% endif %} value="Cash">Cash</option>
+                                      <option style="background-color:#1e1e2f" {% if borrow.mode=="Bank" %} selected="selected" {% endif %} value="Bank">Bank</option>
+                                      <option style="background-color:#1e1e2f" {% if borrow.mode=="Credit card" %} selected="selected" {% endif %} value="Credit card">Credit card</option>
+                                    </select>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div class="row">
+                                <div class="col-md-6 pr-md-1">
+                                  <div class="form-group">
+                                   <label style="color:gray">Borrower</label>
+                                   <input type="text" class="form-control" placeholder="Borrower" id="" name="borrower" value="{{borrow.borrower}}">
+                                  </div>
+                                </div>
+
+                                <div class="col-md-6 pl-md-1">
+                                 <div class="form-group" style="display:none" id='bank_dropdown_update{{borrow.id}}'>
+                                    <label style="color:gray">Bank</label>
+                                    <select class="form-control" name="bid">
+                                      <option style="background-color:#1e1e2f" id="default1{{borrow.id}}">Choose...</option>
+                                        {% for bank in banks %}
+                                        {% set bank_id = bank.id %}
+                                      <option style="background-color:#1e1e2f" {% if borrow.bid==bank_id %} selected="selected" {% endif %} value="{{bank.id}}">{{bank.bank}}</option>
+                                      {% endfor %}
+                                    </select>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="row">
+                                <div class="col-md-6 pr-md-1">
+                                 <div class="form-group" id=''>
+                                    <label style="color:gray">Lender</label>
+                                    <input type="text" class="form-control" placeholder="Lender" id="" name="lender" value="{{borrow.lender}}" autocomplete="False">
+                                  </div>
+                                </div>
+                                <div class="col-md-6 pl-md-1">
+                                  <div class="form-group" style="display:none;" id="cc_dropdown_update{{borrow.id}}">
+                                   <label style="color:gray">Credit Card</label>
+                                   <select class="form-control" id="ccid" name="ccid">
+                                      <option style="background-color:#1e1e2f" id="default{{borrow.id}}">Choose...</option>
+                                      {% for credit in cards %}
+                                        {% set credit_id = credit.id %}
+                                      <option style="background-color:#1e1e2f" {% if borrow.ccid==credit_id %} selected="selected" {% endif %} value="{{credit.id}}">{{credit.credit_card}}</option>
+                                      {% endfor %}
+                                    </select>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div class="row">
+                                <div class="col-md-3 pr-md-1">
+                                  <div class="form-group">
+                                    <label style="color:gray">Amount</label>
+                                    <input type="text" class="form-control" placeholder="Amount" name="borrow_amount" value="{{borrow.borrow_amount}}">
+                                  </div>
+                                </div>
+                                <div class="col-md-9 pl-md-1">
+                                  <div class="form-group">
+                                    <label style="color:gray">Description</label>
+                                    <input type="text" class="form-control" placeholder="Description" name="description" value="{{borrow.description}}">
+                                  </div>
+                                </div>
+                              </div>
+
+
+                          <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Update</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                          </div>
+                        </form>
+                        </div>
+
+
+                      </div>
+                    </div>
+                  </div>
+
+
+         <!-- Modal deposit update End -->
+                    {% endfor %}
+                        </tbody>
+                      </table>
+                      <!-- Pagination Links-->
+                        <div class="text-right">
+                            <a href="{{ url_for('borrow_lending', page=borr.prev_num) }}"
+                               class="btn btn-info btn-sm
+                               {% if borr.page == 1 %}disabled{% endif %}">
+                                &laquo;
+                            </a>
+                        <!-- Loop through the number of pages to display a link for each-->
+                            {% for page_num in borr.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                        {% if page_num %}
+                        <!-- Check for the active page and set the link to "Active"-->
+                                    {% if borr.page == page_num %}
+                                    <a href="{{ url_for('borrow_lending', page=page_num) }}"
+                                       class="btn btn-primary btn-sm">
+                                        {{ page_num }}
+                                    </a>
+                                    {% else %}
+
+                                    <a href="{{ url_for('borrow_lending', page=page_num) }}"
+                                       class="btn btn-outline-dark btn-sm">
+                                        {{ page_num }}
+                                    </a>
+                                    {% endif %}
+                                {% else %}
+                                    ...
+                                {% endif %}
+                            {% endfor %}
+
+                            <a href="{{ url_for('borrow_lending', page=borr.next_num) }}"
+                               class="btn btn-info btn-sm
+                               {% if borr.page == borr.pages %}disabled{% endif %}">
+                                &raquo;{{year}}
+                            </a>
+                        </div>
+                        <p class="text-right mt-3">
+                           Showing page {{ borr.page }} of {{ borr.pages }}
+                        </p>
+                    </div>
+
+              </div>
+            </div>
+
+           <!-- Table borrow end -->
+
+          <!-- Modal borrow add Start -->
+
+          <div class="modal modal-black" id="borrow_modal" tabindex="-1" role="dialog">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title">Add Borrow/Lending</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body">
+                        <form action="/borrower/add" method="post">
+                          <div class="row">
+                                <div class="col-md-6 pr-md-1">
+                                  <div class="form-group">
+                                    <label style="color:gray">Date</label>
+                                    <input type="date" class="form-control" placeholder="" name="date" value="">
+                                  </div>
+                                </div>
+                                <div class="col-md-6 pl-md-1">
+                                  <div class="form-group">
+                                    <label style="color:gray">Trans No.</label>
+                                    <input type="text" class="form-control" placeholder="" id="trans_no" name="trans_no" style="color:pink" value="{{next_trans_no}}" readonly>
+                                  </div>
+                                </div>
+
+                              </div>
+                              <div class="row">
+                                <div class="col-md-6 pr-md-1">
+                                  <div class="form-group">
+                                    <label style="color:gray">Type</label>
+                                    <select class="form-control" name="type">
+                                      <option style="background-color:#1e1e2f">Choose...</option>
+                                      <option style="background-color:#1e1e2f" value="BORROW">BORROW</option>
+                                      <option style="background-color:#1e1e2f" value="LENDING">LENDING</option>
+                                    </select>
+                                  </div>
+                                </div>
+                                <div class="col-md-6 pl-md-1">
+                                  <div class="form-group">
+                                    <label style="color:gray">Mode</label>
+                                    <select class="form-control" id="pay_mode" name="mode">
+                                      <option style="background-color:#1e1e2f">Choose...</option>
+                                      <option style="background-color:#1e1e2f" value="Cash">Cash</option>
+                                      <option style="background-color:#1e1e2f" value="Bank">Bank</option>
+                                      <option style="background-color:#1e1e2f" value="Credit card">Credit Card</option>
+                                    </select>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div class="row">
+                                <div class="col-md-6 pr-md-1">
+                                  <div class="form-group">
+                                   <label style="color:gray">Borrower</label>
+                                   <input type="text" class="form-control" placeholder="Borrower" id="" name="borrower" value="">
+                                  </div>
+                                </div>
+
+                                <div class="col-md-6 pl-md-1">
+                                 <div class="form-group" style='display:none;' id='bank_dropdown'>
+                                    <label style="color:gray">Bank</label>
+                                    <select class="form-control" name="bid">
+                                      <option style="background-color:#1e1e2f">Choose...</option>
+                                        {% for bank in banks %}
+                                      <option style="background-color:#1e1e2f" value="{{bank.id}}">{{bank.bank}}</option>
+                                        {% endfor %}
+                                    </select>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="row">
+                                <div class="col-md-6 pr-md-1">
+                                 <div class="form-group" id=''>
+                                    <label style="color:gray">Lender</label>
+                                    <input type="text" class="form-control" placeholder="Lender" id="" name="lender" value="" autocomplete="False">
+                                  </div>
+                                </div>
+                                <div class="col-md-6 pl-md-1">
+                                  <div class="form-group" style='display:none;' id='cc_dropdown'>
+                                   <label style="color:gray">Credit Card</label>
+                                   <select class="form-control" name="ccid">
+                                      <option style="background-color:#1e1e2f">Choose...</option>
+                                       {% for card in cards %}
+                                      <option style="background-color:#1e1e2f" value="{{card.id}}">{{card.credit_card}}</option>
+                                       {% endfor %}
+                                    </select>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="row">
+                                <div class="col-md-3 pr-md-1">
+                                  <div class="form-group">
+                                    <label style="color:gray">Amount</label>
+                                    <input type="text" class="form-control" placeholder="Amount" name="borrow_amount" value="">
+                                  </div>
+                                </div>
+                                <div class="col-md-9 pl-md-1">
+                                  <div class="form-group">
+                                    <label style="color:gray">Description</label>
+                                    <input type="text" class="form-control" placeholder="Description" name="description" value="">
+                                  </div>
+                                </div>
+                              </div>
+
+
+                          <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Add</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                          </div>
+                        </form>
+                        </div>
+
+
+                      </div>
+                    </div>
+                  </div>
+
+            <!-- Modal borrow add End -->
+
+
+
+      </div>
+    </div>
+</div>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script>
+$(document).ready(function(){
+    $('#pay_mode').on('change', function() {
+      if ( this.value == 'Bank')
+      {
+        $("#bank_dropdown").show();
+      }
+      else
+      {
+        $("#bank_dropdown").hide();
+      }
+      if ( this.value == 'Credit card')
+      {
+        $("#cc_dropdown").show();
+      }
+      else
+      {
+        $("#cc_dropdown").hide();
+      }
+    });
+
+   });
+
+</script>
+
+<script>
+    function editfunction(id){
+    var mode = document.getElementById("pay_mode_update"+id).value;
+
+    if (mode == "Bank"){
+    var bank =(document.getElementById("bank_dropdown_update"+id));
+    bank.style.display="block";
+    var card =(document.getElementById("cc_dropdown_update"+id));
+    card.style.display="none";
+    document.getElementById("default"+id).selected = "true";
+    }
+    if (mode == "Credit card"){
+    var card =(document.getElementById("cc_dropdown_update"+id));
+    card.style.display="block";
+    card.required = "true";
+    var bank =(document.getElementById("bank_dropdown_update"+id));
+    bank.style.display="none";
+    document.getElementById("default1"+id).selected = "true";
+    }
+    if (mode == "Cash"){
+    var card =(document.getElementById("cc_dropdown_update"+id));
+    card.style.display="none";
+    var bank =(document.getElementById("bank_dropdown_update"+id));
+    bank.style.display="none";
+    document.getElementById("default1"+id).selected = "true";
+    document.getElementById("default"+id).selected = "true";
+
+    }
+
+
+    }
+</script>
+
+{% endblock %}
